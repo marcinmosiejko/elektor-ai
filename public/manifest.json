@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "name": "qwik-project-name",
-  "short_name": "Welcome to Qwik",
+  "name": "ElektorAI",
+  "short_name": "ElektorAI",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#fff",
-  "description": "A Qwik project app."
+  "description": "Poznaj programy wyborcze z pomocą AI i podejmij bardziej świadomą decyzję na kogo oddać swój głos podczas tegorocznych wyborów parlamentarnych zaplanowanych na 15 października 2023."
 }

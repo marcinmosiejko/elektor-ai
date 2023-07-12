@@ -1,65 +1,125 @@
-# Qwik City App ⚡️
+<a name="readme-top"></a>
 
-- [Qwik Docs](https://qwik.builder.io/)
-- [Discord](https://qwik.builder.io/chat)
-- [Qwik GitHub](https://github.com/BuilderIO/qwik)
-- [@QwikDev](https://twitter.com/QwikDev)
-- [Vite](https://vitejs.dev/)
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+     <a href="https://elektorai.pl/">
+    <img src="https://github.com/marcinmosiejko/elektor-ai/blob/main/public/favicon.png" alt="Logo" width="64" height="64">
+  </a>
 
----
+<h3 align="center">Elektor AI</h3>
 
-## Project Structure
+  <p align="center">
+    AI Voting Assistant
+    <br />
+    <br />
+    <a href="https://elektorai.pl/">View</a>
+  </p>
+</div>
 
-This project is using Qwik with [QwikCity](https://qwik.builder.io/qwikcity/overview/). QwikCity is just an extra set of tools on top of Qwik to make it easier to build a full site, including directory-based routing, layouts, and more.
+<br />
+<br />
 
-Inside your project, you'll see the following directory structure:
+<!-- FEATURES -->
 
-```
-├── public/
-│   └── ...
-└── src/
-    ├── components/
-    │   └── ...
-    └── routes/
-        └── ...
-```
+## Features
 
-- `src/routes`: Provides the directory-based routing, which can include a hierarchy of `layout.tsx` layout files, and an `index.tsx` file as the page. Additionally, `index.ts` files are endpoints. Please see the [routing docs](https://qwik.builder.io/qwikcity/routing/overview/) for more info.
+### User
 
-- `src/components`: Recommended directory for components.
+- Ask questions to selected party's election program
+- Streamed answers using ChatGPT 3.5
+- Themes
 
-- `public`: Any static assets, like images, can be placed in the public directory. Please see the [Vite public directory](https://vitejs.dev/guide/assets.html#the-public-directory) for more info.
+### Management
 
-## Add Integrations and deployment
+- Backoffice with admin access only (auth using github) that allows for
+  - parse pdf files and CRUD source documents
+  - CRUD cached answers
 
-Use the `pnpm qwik add` command to add additional integrations. Some examples of integrations includes: Cloudflare, Netlify or Express Server, and the [Static Site Generator (SSG)](https://qwik.builder.io/qwikcity/guides/static-site-generation/).
+### Optimizations
 
-```shell
-pnpm qwik add # or `yarn qwik add`
-```
+- Rate limiting based on user's IP
+- Caching already asked questions
 
-## Development
+<br />
 
-Development mode uses [Vite's development server](https://vitejs.dev/). The `dev` command will server-side render (SSR) the output during development.
+<!-- SCREENSHOTS -->
 
-```shell
-npm start # or `yarn start`
-```
+<!-- ## Video
 
-> Note: during dev mode, Vite may request a significant number of `.js` files. This does not represent a Qwik production build.
+<br />
+<img src="https://github.com/mosiej803/trakker-app/blob/main/src/assets/img/screenshots/screenshot_1.png" alt="desktop usage 1" />
+<img src="https://github.com/mosiej803/trakker-app/blob/main/src/assets/img/screenshots/screenshot_2.png" alt="desktop usage 2" />
+<img src="https://github.com/mosiej803/trakker-app/blob/main/src/assets/img/screenshots/screenshot_3.png" alt="desktop usage 3" />
+<img src="https://github.com/mosiej803/trakker-app/blob/main/src/assets/img/screenshots/screenshot_4.png" alt="desktop usage 4" /> -->
 
-## Preview
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<br />
 
-The preview command will create a production build of the client modules, a production build of `src/entry.preview.tsx`, and run a local server. The preview server is only for convenience to preview a production build locally and should not be used as a production server.
+<!-- BUILT WITH -->
 
-```shell
-pnpm preview # or `yarn preview`
-```
+## Built With
 
-## Production
+[![TS][Typescript]][Typescript-url]
+[![Qwik][Qwik.js]][Qwik-url]
+[![Node][Node]][Node-url]
+[![Tailwind][Tailwind]][Tailwind-url]
+[![ChatGPT][ChatGPT]][ChatGPT-url]
+[![MongoDB][MongoDB]][MongoDB-url]
 
-The production build will generate client and server modules by running both client and server build commands. The build command will use Typescript to run a type check on the source code.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<br />
 
-```shell
-pnpm build # or `yarn build`
-```
+<!-- RUN LOCALLY -->
+
+## Run The App Locally
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/marcin_mosiejko/elektor-ai
+   ```
+2. Rename `.env.example` to `.env.local` file and provide:
+
+- your Github email address that will be used for admin verification (for backoffice access)
+- [Github Auth](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) credentials
+- [Pinecone](https://www.pinecone.io/) credentials
+- [MongoDB](https://mongodb.com/) url (run locally or in cloud)
+
+3. Install NPM packages
+   ```sh
+   npm install
+   ```
+4. Run
+   ```sh
+   npm run dev
+   ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<br />
+
+<!-- CONTACT -->
+
+## Contact
+
+LinkedIn - [Marcin Mosiejko](https://www.linkedin.com/in/marcin-mosiejko-45937051/)
+
+Twitter - [@marcin_mosiejko](https://twitter.com/marcin_mosiejko)
+
+Project Link - [https://github.com/marcinmosiejko/elektor-ai](https://github.com/marcinmosiejko/elektor-ai)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- LINKS -->
+
+[Typescript]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[Typescript-url]: https://www.typescriptlang.org/
+[Qwik.js]: https://img.shields.io/badge/Qwik-8A2BE2?style=for-the-badge
+[Qwik-url]: https://qwik.builder.io/
+[Tailwind]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
+[Tailwind-url]: https://tailwindcss.com/
+[Node]: https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white
+[Node-url]: https://nodejs.org/
+[ChatGPT]: https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white
+[ChatGPT-url]: https://chat.openai.com
+[MongoDB]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white
+[MongoDB-url]: https://mongodb.com/
