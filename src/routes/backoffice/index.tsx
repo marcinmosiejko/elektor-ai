@@ -1,5 +1,5 @@
 import { component$, $, useVisibleTask$, useSignal } from "@builder.io/qwik";
-import { Form, routeAction$ } from "@builder.io/qwik-city";
+import { Form } from "@builder.io/qwik-city";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import {
   getValue,
@@ -14,8 +14,6 @@ import {
   zodForm$,
 } from "@modular-forms/qwik";
 import { denoiseContextDocs } from "./helpers";
-import busboy from "busboy";
-import { Readable } from "stream";
 import { normalizedDocsSchema, partySchema } from "~/utils/schemas";
 import { z } from "zod";
 import {
@@ -32,85 +30,11 @@ import {
 
 import type { QwikChangeEvent } from "@builder.io/qwik";
 import type { Session } from "@auth/core/types";
-import type {
-  RequestEvent,
-  RequestEventAction,
-  RequestHandler,
-} from "@builder.io/qwik-city";
-import type { NormalizedDoc, Party } from "~/utils/types";
+import type { RequestEvent, RequestHandler } from "@builder.io/qwik-city";
+import type { Party } from "~/utils/types";
 import SelectInput from "~/components/SelectInput";
 
 const pdfMimeType = "application/pdf";
-
-const getFileBlob = (event: RequestEventAction): Promise<Blob | null> =>
-  new Promise((resolve, reject) => {
-    if (!event.request.body) return resolve(null);
-
-    // @ts-ignore
-    const converted = Readable.fromWeb(event.request.body);
-
-    const bb = busboy({
-      headers: Object.fromEntries(event.request.headers.entries()),
-    });
-
-    let blobData: Buffer | undefined;
-
-    bb.on("file", (_name, file, info) => {
-      if (info.mimeType !== pdfMimeType) resolve(null);
-
-      file.on("data", (chunk) => {
-        if (!blobData) {
-          blobData = chunk;
-        } else {
-          blobData = Buffer.concat([blobData, chunk]);
-        }
-      });
-
-      file.on("end", () => {
-        if (blobData) {
-          resolve(new Blob([blobData], { type: info.mimeType }));
-        } else {
-          resolve(null);
-        }
-      });
-    });
-
-    bb.on("error", reject);
-
-    converted.pipe(bb);
-  });
-
-export const useFileToContextDocs = routeAction$(
-  async (_, event: RequestEventAction) => {
-    if (!event.request.body) {
-      return event.fail(400, {
-        message: "No file provided",
-      });
-    }
-
-    let docs: NormalizedDoc[];
-    try {
-      const fileBlob = await getFileBlob(event);
-
-      if (!fileBlob) {
-        return event.fail(400, {
-          message: "No file or wrong format provided",
-        });
-      }
-
-      const loader = new PDFLoader(fileBlob);
-      const rawDocs = await loader.load();
-      docs = denoiseContextDocs(rawDocs);
-    } catch (err: any) {
-      return event.fail(400, {
-        message: "Failed to parse the file",
-        err: JSON.stringify(err),
-      });
-    }
-
-    return { docs };
-  }
-);
 
 const contextDocsFormSchema = z.object({
   docs: normalizedDocsSchema,
@@ -142,19 +66,24 @@ export const onRequest: RequestHandler = async (event: RequestEvent) => {
 };
 
 export default component$(() => {
-  const fileToContextDocs = useFileToContextDocs();
   const isLoading = useSignal<boolean>(false);
 
   const onChange = $(async (e: QwikChangeEvent<HTMLInputElement>) => {
     const inputtedFile = e.target.files?.[0];
+
     if (!inputtedFile || inputtedFile.type !== pdfMimeType) {
       console.error(`File type ${inputtedFile?.type || ""} is not supported`);
       return;
     }
+    const blob = new Blob([inputtedFile]);
+    const loader = new PDFLoader(blob);
+    const rawDocs = await loader.load();
+    const docs = denoiseContextDocs(rawDocs);
 
-    const fileFormData = new FormData();
-    fileFormData.append("file", inputtedFile);
-    await fileToContextDocs.submit(fileFormData);
+    reset(contextDocsForm, "docs");
+    setValues(contextDocsForm, "docs", docs);
+
+    localStorage.setItem("docs", JSON.stringify(docs));
   });
 
   const [contextDocsForm, { Form: ContextDocsForm, Field, FieldArray }] =
@@ -170,17 +99,6 @@ export default component$(() => {
     if (!docs) return;
 
     setValues(contextDocsForm, "docs", JSON.parse(docs));
-  });
-
-  useVisibleTask$(({ track }) => {
-    track(() => fileToContextDocs.value);
-
-    if (!fileToContextDocs.value?.docs?.length) return;
-
-    reset(contextDocsForm, "docs");
-    setValues(contextDocsForm, "docs", fileToContextDocs.value.docs);
-
-    localStorage.setItem("docs", JSON.stringify(fileToContextDocs.value.docs));
   });
 
   // prevents from the upload fields' names duplication
