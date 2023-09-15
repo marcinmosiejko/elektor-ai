@@ -37,7 +37,7 @@ import type {
   RequestEventAction,
   RequestHandler,
 } from "@builder.io/qwik-city";
-import type { NormalizedDoc, Party } from "~/utils/types";
+import type { ContextDoc, NormalizedDoc, Party } from "~/utils/types";
 import SelectInput from "~/components/SelectInput";
 
 const pdfMimeType = "application/pdf";
@@ -126,6 +126,15 @@ const emptyDoc = {
   },
   pageContent: "",
 };
+
+/**
+ * Removes chapterName separated by ### from pageContent
+ * as it was added only for better similarity search results.
+ */
+const purifyContextDoc = (doc: ContextDoc) => ({
+  ...doc,
+  pageContent: doc.pageContent.split("###")[1] || doc.pageContent,
+});
 
 export const onRequest: RequestHandler = async (event: RequestEvent) => {
   const session: Session | null = event.sharedMap.get("session");
@@ -237,7 +246,9 @@ export default component$(() => {
                 isLoading.value = true;
                 const party = getValue(contextDocsForm, "party");
                 const contextDocs = await getConextDocsFromMDB(party!);
-                setValues(contextDocsForm, { docs: contextDocs });
+                setValues(contextDocsForm, {
+                  docs: contextDocs.map(purifyContextDoc),
+                });
                 localStorage.setItem("docs", JSON.stringify(contextDocs));
                 isLoading.value = false;
               }}
@@ -252,7 +263,9 @@ export default component$(() => {
                 isLoading.value = true;
                 const party = getValue(contextDocsForm, "party");
                 const contextDocs = await getContextDocsFromVectorStore(party!);
-                setValues(contextDocsForm, { docs: contextDocs });
+                setValues(contextDocsForm, {
+                  docs: contextDocs.map(purifyContextDoc),
+                });
                 localStorage.setItem("docs", JSON.stringify(contextDocs));
                 isLoading.value = false;
               }}
@@ -303,6 +316,7 @@ export default component$(() => {
                 ).map((doc, i) => {
                   return {
                     ...doc,
+                    pageContent: `${doc.metadata.chapterName}###${doc.pageContent}`, // Adding chapterName to pageContent for better similarity search results
                     metadata: {
                       ...doc.metadata,
                       id: `${party}--${i + 1}`,
@@ -427,8 +441,8 @@ export default component$(() => {
 
                             // PIS
                             const mapka = {
-                             '- ': ''
-                            }
+                              "- ": "",
+                            };
 
                             let newPageContent = curVal?.pageContent;
 

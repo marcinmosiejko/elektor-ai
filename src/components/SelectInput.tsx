@@ -36,6 +36,7 @@ type SelectProps = {
   selectClass?: string;
   label?: string;
   error?: string;
+  disabled?: boolean;
 };
 
 /**
@@ -44,7 +45,7 @@ type SelectProps = {
  * entry requirements.
  */
 const SelectInput = component$(
-  ({ value, options, label, error, ...props }: SelectProps) => {
+  ({ value, options, label, error, disabled, ...props }: SelectProps) => {
     const { name, required, placeholder } = props;
 
     // Create computed value of selected values
@@ -73,6 +74,7 @@ const SelectInput = component$(
             id={name}
             aria-invalid={!!error}
             aria-errormessage={`${name}-error`}
+            disabled={disabled}
           >
             <option value="" disabled hidden selected={!value}>
               {placeholder}

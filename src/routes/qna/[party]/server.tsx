@@ -13,11 +13,57 @@ import type { ContextDoc, Party } from "~/utils/types";
 import type { MongoError } from "mongodb";
 import { vectorStore } from "~/utils/pineconeDB";
 
+type RequestsMap = Record<string, number[] | undefined>;
+const REQUESTS_MAP: RequestsMap = {};
+const RATE_LIMIT_MAX_COUNT = 1;
+const RATE_LIMIT_TIME = 1000 * 60 * 60;
+
+const calcRateLimit = (userFingerprint: string) => {
+  const userReqests: number[] = [];
+
+  for (const requestTs of REQUESTS_MAP[userFingerprint] || []) {
+    if (Date.now() - requestTs < RATE_LIMIT_TIME) {
+      userReqests.push(requestTs);
+    }
+  }
+
+  if (userReqests.length === RATE_LIMIT_MAX_COUNT) {
+    const timeFromFirstRequest = Date.now() - userReqests[0];
+
+    if (timeFromFirstRequest < RATE_LIMIT_TIME) {
+      const remainingTime = RATE_LIMIT_TIME - timeFromFirstRequest;
+      const remainingMinutes = Math.floor(remainingTime / (60 * 1000));
+      const remainingSeconds = Math.ceil((remainingTime % (60 * 1000)) / 1000);
+
+      const minuteLabel =
+        remainingMinutes === 1
+          ? "minutę"
+          : 2 >= remainingMinutes && remainingMinutes <= 4
+          ? "minuty"
+          : "minut";
+
+      const secondLabel =
+        remainingSeconds === 1
+          ? "sekundę"
+          : 2 >= remainingSeconds && remainingSeconds <= 4
+          ? "minuty"
+          : "sekund";
+
+      return {
+        rateLimitWarning: `Przekroczyłeś limit zapytań, kolejne pytanie będziesz mógł zadać za ${remainingMinutes} ${minuteLabel} i ${
+          remainingSeconds === 60 ? 59 : remainingSeconds
+        } ${secondLabel}.`,
+      };
+    }
+  }
+};
+
 /**
- * Tries to get cached answer and contextDocs based on
- * matching answer and party.
- * If there's no matching result, it will retrieve contextDocs
- * (without answer) doing similarity search, providing.
+ * Tries to get cached answer and contextDocs based on matching answer and party.
+ *
+ * If there's no matching result, it will check rate limit and:
+ * - if it's exceeded it will return rateLimitWarning
+ * - if it's fine it will retrieve contextDocs (without answer) doing similarity search.
  */
 export const getContextDocsAndAnswer = server$(async function ({
   question,
@@ -25,9 +71,12 @@ export const getContextDocsAndAnswer = server$(async function ({
 }: {
   question: string;
   party: Party;
-}): Promise<{ contextDocs: ContextDoc[]; answer?: string }> {
+}): Promise<{
+  answer?: string;
+  contextDocs?: ContextDoc[];
+  rateLimitWarning?: string;
+}> {
   // 1. get cached answer and context docs ids
-
   let cachedData;
   try {
     cachedData = ((await cacheCollection.findOne({
@@ -40,54 +89,64 @@ export const getContextDocsAndAnswer = server$(async function ({
 
   const { contextDocsIds, answer, searchCount } = cachedData;
 
-  // 2. get context docs based on cached context docs ids
-  let contextDocs;
-  if (contextDocsIds?.length) {
-    try {
-      contextDocs = (
-        await contextDocsCollection
-          .find({
-            "metadata.id": { $in: contextDocsIds },
-          })
-          .toArray()
-      ).map((doc) => lodash.omit(doc, ["_id"]));
-    } catch (err) {
-      console.error(
-        "Failed to find documents in contextDocsMDbCollection",
-        err
-      );
-    }
-  }
-
-  // 3. if data is valid, update search count and return cached data
-  const parsedCache = cachedContextDocsAndAnswerSchema.safeParse({
-    contextDocs,
-    answer,
-    searchCount,
-  });
-
-  if (answer && parsedCache.success) {
-    try {
-      await cacheCollection.updateOne(
-        { question, party },
-        { $set: { searchCount: searchCount + 1 } }
-      );
-    } catch (err) {
-      console.error("Failed to update search count", err);
+  if (answer && contextDocsIds && searchCount) {
+    // 2. get context docs based on cached context docs ids
+    let contextDocs;
+    if (contextDocsIds?.length) {
+      try {
+        contextDocs = (
+          await contextDocsCollection
+            .find({
+              "metadata.id": { $in: contextDocsIds },
+            })
+            .toArray()
+        ).map((doc) => lodash.omit(doc, ["_id"]));
+      } catch (err) {
+        console.error(
+          "Failed to find documents in contextDocsMDbCollection",
+          err
+        );
+      }
     }
 
-    return {
-      contextDocs: parsedCache.data.contextDocs,
+    // 3. if data is valid, update search count and return cached data
+    const parsedCache = cachedContextDocsAndAnswerSchema.safeParse({
+      contextDocs,
       answer,
-    };
-  } else {
-    // @ts-ignore
-    if (parsedCache.error) {
-      // @ts-ignore
+      searchCount,
+    });
+
+    if (parsedCache.success) {
+      try {
+        await cacheCollection.updateOne(
+          { question, party },
+          { $set: { searchCount: searchCount + 1 } }
+        );
+      } catch (err) {
+        console.error("Failed to update search count", err);
+      }
+
+      return {
+        contextDocs: parsedCache.data.contextDocs,
+        answer,
+      };
+    } else {
       console.error("Failed to parse cache data", parsedCache.error);
     }
   }
 
+  // Check rate limit as this will lead to calling openAI API
+  // and if a user used up their quota, we don't want to even
+  // try to get context docs
+
+  const userFingerprint = this.clientConn.ip!;
+  console.log("userFingerprint", userFingerprint);
+  const rateLimit = calcRateLimit(userFingerprint);
+  if (rateLimit) {
+    return rateLimit;
+  }
+
+  let contextDocs;
   try {
     contextDocs = (await vectorStore.similaritySearch(
       question,
@@ -161,12 +220,19 @@ export const generateAnswer = server$(async function* ({
     });
   } catch (err) {
     console.error("Failed to get stream", err);
-    // throw new Error("Failed to get stream");
-    return;
+    throw err;
   }
-
+  console.log("is locked", stream.locked);
   // Get a lock on the stream
   const reader = stream.getReader();
+
+  reader.closed
+    .then(() => {
+      console.log("The stream has been cancelled");
+    })
+    .catch((err) => {
+      console.log("The stream encountered an error: ", err);
+    });
 
   const decoder = new TextDecoder();
   let done = false;
@@ -183,10 +249,16 @@ export const generateAnswer = server$(async function* ({
     }
   } catch (err) {
     console.error("Failed to read stream", err);
-    // throw new Error("Failed to read stream");
-    return;
+    throw err;
   } finally {
+    console.log("---------- Releasing lock ------------");
     reader.releaseLock();
+
+    const userFingerprint = this.clientConn.ip!;
+    REQUESTS_MAP[userFingerprint] = [
+      ...(REQUESTS_MAP[userFingerprint] || []),
+      Date.now(),
+    ];
   }
 
   try {

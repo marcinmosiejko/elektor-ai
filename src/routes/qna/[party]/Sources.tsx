@@ -13,14 +13,16 @@ export default component$(() => {
         {contextDocs.map((doc) => {
           const pageNumber = doc.metadata.pageNumber;
           const chapterName = doc.metadata.chapterName.toUpperCase();
+          const pageContent =
+            doc.pageContent.split("###")[1] || doc.pageContent;
           return (
-            <div class="flex flex-col gap-1" key={doc.pageContent.slice(0, 20)}>
+            <div class="flex flex-col gap-1" key={pageContent.slice(0, 20)}>
               <span class="text-xs text-teal-500">
                 <span>{chapterName}</span>
                 {chapterName && pageNumber && " · "}
                 <span>s. {pageNumber}</span>
               </span>
-              <div class="font-light">{doc.pageContent}</div>
+              <div class="font-light">{pageContent}</div>
             </div>
           );
         })}

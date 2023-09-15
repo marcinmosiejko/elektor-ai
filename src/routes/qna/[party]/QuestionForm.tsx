@@ -2,7 +2,6 @@ import {
   $,
   component$,
   useContext,
-  useSignal,
   useTask$,
   useVisibleTask$,
 } from "@builder.io/qwik";
@@ -11,19 +10,14 @@ import { Image } from "@unpic/qwik";
 import { QnAContext } from "~/context/qna";
 import { questionSchema, partySchema } from "~/utils/schemas";
 import { useLocation, useNavigate } from "@builder.io/qwik-city";
-import {
-  getValue,
-  setValue,
-  useForm,
-  validate,
-  zodForm$,
-} from "@modular-forms/qwik";
+import { setValue, useForm, validate, zodForm$ } from "@modular-forms/qwik";
 import { z } from "zod";
 import { ThemeContext } from "~/context/theme";
 import TextInput from "~/components/TextInput";
 
-import type { Party, QnA } from "~/utils/types";
+import type { QnA } from "~/utils/types";
 import SelectInput from "~/components/SelectInput";
+import { SendIcon } from "lucide-qwik";
 
 const formSchema = z.object({
   question: questionSchema,
@@ -37,7 +31,6 @@ export default component$(
     const loc = useLocation();
     const nav = useNavigate();
     const themeSignal = useContext(ThemeContext);
-    const isPartySetUsingKeyDown = useSignal<boolean>(false);
 
     const { isGeneratingAnswer } = useContext(QnAContext);
 
@@ -71,15 +64,23 @@ export default component$(
         <Field name="question">
           {(field, props) => {
             return (
-              <TextInput
-                {...props}
-                type="text"
-                value={field.value}
-                error={field.error}
-                placeholder="np. Jakie będą korzyści dla młodych?"
-                inputClass="h-16"
-                disabled={isGeneratingAnswer}
-              />
+              <div class="relative">
+                <TextInput
+                  {...props}
+                  type="text"
+                  value={field.value}
+                  error={field.error}
+                  placeholder="np. Jakie będą korzyści dla młodych?"
+                  inputClass="h-16 pr-20"
+                  disabled={isGeneratingAnswer}
+                />
+                <button
+                  class="btn absolute top-2 right-2 p-4 cursor-pointer"
+                  type="submit"
+                >
+                  <SendIcon class="h-4 w-4 rotate-[15deg]" />
+                </button>
+              </div>
             );
           }}
         </Field>
@@ -101,31 +102,7 @@ export default component$(
                       })
                     )}
                     error={field.error}
-                    onChange$={(_e, v) => {
-                      const party = v.value as Party;
-                      setValue(questionForm, "party", party);
-                      const question = getValue(questionForm, "question");
-
-                      if (
-                        !question ||
-                        !questionSchema.safeParse(question).success
-                      ) {
-                        const url = new URL(`${loc.url.origin}/qna/${party}`);
-                        isPartySetUsingKeyDown.value = false;
-                        nav(url.href);
-                        return;
-                      }
-
-                      if (isPartySetUsingKeyDown.value) {
-                        isPartySetUsingKeyDown.value = false;
-                        return;
-                      }
-
-                      onSubmit({
-                        question,
-                        party,
-                      });
-                    }}
+                    disabled={isGeneratingAnswer}
                   />
                   <Image
                     class="absolute top-0 left-2 p-3 cursor-pointer pointer-events-none"

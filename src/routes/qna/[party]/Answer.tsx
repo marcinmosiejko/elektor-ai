@@ -56,11 +56,15 @@ export default component$(
       const denoisedQuestionParam =
         removeExtraSpacesAndBeforePunctuation(questionParam);
 
-      let contextDocs, cachedAnswer;
+      let contextDocs, cachedAnswer, rateLimitWarning;
       try {
-        ({ contextDocs, answer: cachedAnswer } = await getContextDocsAndAnswer(
+        ({
+          contextDocs,
+          answer: cachedAnswer,
+          rateLimitWarning,
+        } = await getContextDocsAndAnswer(
           // eslint-disable-next-line qwik/valid-lexical-scope
-          controllerSignal.value.signal,
+          // controllerSignal.value.signal,
           {
             question: denoisedQuestionParam,
             party: partyParam,
@@ -80,7 +84,13 @@ export default component$(
 
       if (cachedAnswer) {
         await imitateAiAnswer(cachedAnswer, answerSignal);
-        qnaStore.contextDocs = contextDocs;
+        qnaStore.contextDocs = contextDocs!;
+        qnaStore.isGeneratingAnswer = false;
+        return;
+      }
+
+      if (rateLimitWarning) {
+        await imitateAiAnswer(rateLimitWarning, answerSignal);
         qnaStore.isGeneratingAnswer = false;
         return;
       }
@@ -90,7 +100,7 @@ export default component$(
         // eslint-disable-next-line qwik/valid-lexical-scope
         stream = await generateAnswer(controllerSignal.value.signal, {
           question: denoisedQuestionParam,
-          contextDocs,
+          contextDocs: contextDocs!,
           party: partyParam,
         });
       } catch (err) {
@@ -111,7 +121,7 @@ export default component$(
         return;
       }
 
-      qnaStore.contextDocs = contextDocs;
+      qnaStore.contextDocs = contextDocs!;
       qnaStore.isGeneratingAnswer = false;
 
       cleanup(() => {

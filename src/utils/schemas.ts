@@ -56,7 +56,9 @@ export const normalizedDocSchema = z.object({
 
 export const normalizedDocsSchema = z.array(normalizedDocSchema);
 
-export const answerSchema = z.string();
+export const answerSchema = z.string().min(5, {
+  message: "Odpowiedź musi mieć przynajmniej 5 znaków.",
+});
 
 export const searchCountSchema = z.number();
 
