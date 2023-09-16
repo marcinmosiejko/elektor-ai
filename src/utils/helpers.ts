@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 
 import type { ClassValue } from "clsx";
 import type { Signal } from "@builder.io/qwik";
+import { partyMap } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -36,4 +37,11 @@ export const removeExtraSpacesAndBeforePunctuation = (
   result = result.replace(/\s+([?.!])/g, "$1").trim();
 
   return result;
+};
+
+export const getRandomPartyId = () => {
+  const randomPartyIndex = Math.floor(
+    Math.random() * Object.values(partyMap).length
+  );
+  return Object.values(partyMap)[randomPartyIndex].id;
 };

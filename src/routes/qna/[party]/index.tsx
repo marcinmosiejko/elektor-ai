@@ -8,6 +8,7 @@ import type { RequestHandler } from "@builder.io/qwik-city";
 import Sources from "./Sources";
 import QuestionForm from "./QuestionForm";
 import { cacheCollection } from "~/utils/mongoDB";
+import { getRandomPartyId } from "~/utils/helpers";
 
 const popularQuestions = [
   "Jakie będą korzyści dla młodych?",
@@ -23,8 +24,10 @@ export const usePopularQuestions = routeLoader$(async () => {
   ).map((item) => item.question);
 
   while (mostPopular.length < 5) {
-    const randomQuestion =
-      popularQuestions[Math.floor(Math.random() * popularQuestions.length)];
+    const randomQuestionIndex = Math.floor(
+      Math.random() * popularQuestions.length
+    );
+    const randomQuestion = popularQuestions[randomQuestionIndex];
     if (!mostPopular.includes(randomQuestion)) mostPopular.push(randomQuestion);
   }
 
@@ -33,8 +36,9 @@ export const usePopularQuestions = routeLoader$(async () => {
 
 export const onRequest: RequestHandler = async ({ redirect, params }) => {
   const isValidParty = Object.keys(partyMap).includes(params.party);
+
   if (!isValidParty) {
-    throw redirect(307, `/qna/${Object.values(partyMap)[0].id}`);
+    throw redirect(307, `/qna/${getRandomPartyId()}`);
   }
 };
 

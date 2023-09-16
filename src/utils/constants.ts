@@ -6,7 +6,6 @@ export const LEWICA = "lewica";
 export const PSL = "psl";
 export const PLACEHOLDER_PARTY = "placeholder-party";
 export const DEFAULT_BO_PARTY = PLACEHOLDER_PARTY;
-export const DEFAULT_FO_PARTY = KONFEDERACJA;
 export const DEFAULT_MAX_SOURCE_COUNT = 5;
 
 import logoKO from "./../images/logo_ko.png";
@@ -23,6 +22,7 @@ import logo_3droga from "./../images/logo_3droga.png";
 import logo_3droga_white from "./../images/logo_3droga_white.png";
 
 import type { Party } from "./types";
+import { getRandomPartyId } from "./helpers";
 
 export const CACHE_MONGO_COLLECTION = "cache";
 export const CONTEXT_DOCS_MONGO_COLLECTION = "contextDocs";
@@ -70,3 +70,6 @@ export const partyMap = {
     id: TRZECIA_DROGA as Party,
   },
 };
+
+// @ts-ignore
+export const DEFAULT_FO_PARTY = partyMap[getRandomPartyId()];

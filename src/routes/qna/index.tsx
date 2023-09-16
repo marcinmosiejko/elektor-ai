@@ -1,7 +1,6 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
-import { KOALICJA_OBYWATELSKA } from "~/utils/constants";
-// import { component$ } from "@builder.io/qwik";
+import { getRandomPartyId } from "~/utils/helpers";
 
 export const onRequest: RequestHandler = async ({ redirect }) => {
-  throw redirect(307, `/qna/${KOALICJA_OBYWATELSKA}`);
+  throw redirect(307, `/qna/${getRandomPartyId()}`);
 };
