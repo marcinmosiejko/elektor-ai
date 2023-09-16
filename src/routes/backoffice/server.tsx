@@ -6,22 +6,31 @@ import { vectorStore } from "~/utils/pineconeDB";
 import type { ContextDoc, Party } from "~/utils/types";
 
 /**
- * Saves contextDocs to MongoDB and vectorStore by deleting
- * all existing contextDocs for the docs' party and inserting the new ones.
+ * Saves contextDocs to MongoDB by deleting all existing contextDocs for the docs' party and inserting the new ones.
  */
-export const storeContextDocs = server$(async function (
+export const storeContextDocsToMDb = server$(async function (
   contextDocs: ContextDoc[]
 ) {
   const party = contextDocs.at(0)?.metadata.party;
 
   await contextDocsCollection.deleteMany({ "metadata.party": party });
   await contextDocsCollection.insertMany(contextDocs);
+});
+
+/**
+ * Saves contextDocs to VectorStore by deleting all existing contextDocs for the docs' party and inserting the new ones.
+ */
+export const storeContextDocsToVectorStore = server$(async function (
+  contextDocs: ContextDoc[]
+) {
+  const party = contextDocs.at(0)?.metadata.party;
 
   const toDelete = await vectorStore.similaritySearch("", 1000, { party });
   const idsToDelete = toDelete.map((doc) => doc.metadata.id);
   await vectorStore.delete({
     ids: idsToDelete,
   });
+
   await vectorStore.addDocuments(contextDocs, {
     ids: contextDocs.map((doc) => doc.metadata.id),
   });
@@ -36,7 +45,11 @@ export const getContextDocsFromVectorStore = server$(async function (
 
   const parsedContextDocs = contextDocsSchema.safeParse(contextDocs);
 
-  if (parsedContextDocs.success) return parsedContextDocs.data;
+  if (parsedContextDocs.success) {
+    return parsedContextDocs.data.sort(
+      (docA, docB) => docA.metadata.pageNumber - docB.metadata.pageNumber
+    );
+  }
 
   throw new Error(
     "Failed to parse contextDocs from vectorStore",
@@ -44,12 +57,14 @@ export const getContextDocsFromVectorStore = server$(async function (
   );
 });
 
-export const getConextDocsFromMDB = server$(async function (party: Party) {
+export const getConextDocsFromMDb = server$(async function (party: Party) {
   const contextDocs = await contextDocsCollection
     .find({ "metadata.party": party })
+    .sort({ "metadata.pageNumber": 1 })
     .toArray();
 
   const parsedContextDocs = contextDocsSchema.safeParse(contextDocs);
+
   if (parsedContextDocs.success) return parsedContextDocs.data;
 
   throw new Error(JSON.stringify(parsedContextDocs.error));

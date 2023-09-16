@@ -10,10 +10,9 @@ import {
   reset,
   setValues,
   useForm,
-  validate,
   zodForm$,
 } from "@modular-forms/qwik";
-import { denoiseContextDocs } from "./helpers";
+import { denoiseContextDocs, prepareContextDocsToEmbed } from "./helpers";
 import busboy from "busboy";
 import { Readable } from "stream";
 import { normalizedDocsSchema, partySchema } from "~/utils/schemas";
@@ -25,11 +24,13 @@ import {
 } from "~/utils/constants";
 import TextInput from "~/components/TextInput";
 import {
-  storeContextDocs,
-  getConextDocsFromMDB,
+  storeContextDocsToMDb,
+  storeContextDocsToVectorStore,
+  getConextDocsFromMDb,
   getContextDocsFromVectorStore,
   clearAllCache,
 } from "./server";
+import SelectInput from "~/components/SelectInput";
 
 import type { QwikChangeEvent } from "@builder.io/qwik";
 import type { Session } from "@auth/core/types";
@@ -39,7 +40,6 @@ import type {
   RequestHandler,
 } from "@builder.io/qwik-city";
 import type { ContextDoc, NormalizedDoc, Party } from "~/utils/types";
-import SelectInput from "~/components/SelectInput";
 
 const pdfMimeType = "application/pdf";
 
@@ -153,7 +153,7 @@ export const onRequest: RequestHandler = async (event: RequestEvent) => {
 
 export default component$(() => {
   const fileToContextDocs = useFileToContextDocs();
-  const isLoading = useSignal<boolean>(false);
+  const isLoadingSignal = useSignal<boolean>(false);
 
   const onChange = $(async (e: QwikChangeEvent<HTMLInputElement>) => {
     const inputtedFile = e.target.files?.[0];
@@ -212,11 +212,11 @@ export default component$(() => {
         <button
           type="button"
           class="btn btn-error btn-outline max-w-xs"
-          disabled={isLoading.value}
+          disabled={isLoadingSignal.value}
           onClick$={async () => {
-            isLoading.value = true;
+            isLoadingSignal.value = true;
             await clearAllCache();
-            isLoading.value = false;
+            isLoadingSignal.value = false;
           }}
         >
           clear all cache
@@ -244,7 +244,7 @@ export default component$(() => {
             <button
               type="button"
               class="btn btn-error btn-outline max-w-xs"
-              disabled={isLoading.value}
+              disabled={isLoadingSignal.value}
               onClick$={() => {
                 localStorage.removeItem("docs");
                 reset(contextDocsForm, "docs");
@@ -255,16 +255,16 @@ export default component$(() => {
             <button
               type="button"
               class="btn btn-accent btn-outline max-w-xs"
-              disabled={isLoading.value}
+              disabled={isLoadingSignal.value}
               onClick$={async () => {
-                isLoading.value = true;
+                isLoadingSignal.value = true;
                 const party = getValue(contextDocsForm, "party");
-                const contextDocs = await getConextDocsFromMDB(party!);
+                const contextDocs = await getConextDocsFromMDb(party!);
                 setValues(contextDocsForm, {
                   docs: contextDocs.map(purifyContextDoc),
                 });
                 localStorage.setItem("docs", JSON.stringify(contextDocs));
-                isLoading.value = false;
+                isLoadingSignal.value = false;
               }}
             >
               load MDB
@@ -272,16 +272,16 @@ export default component$(() => {
             <button
               type="button"
               class="btn btn-accent btn-outline max-w-xs"
-              disabled={isLoading.value}
+              disabled={isLoadingSignal.value}
               onClick$={async () => {
-                isLoading.value = true;
+                isLoadingSignal.value = true;
                 const party = getValue(contextDocsForm, "party");
                 const contextDocs = await getContextDocsFromVectorStore(party!);
                 setValues(contextDocsForm, {
                   docs: contextDocs.map(purifyContextDoc),
                 });
                 localStorage.setItem("docs", JSON.stringify(contextDocs));
-                isLoading.value = false;
+                isLoadingSignal.value = false;
               }}
             >
               load VS
@@ -290,7 +290,7 @@ export default component$(() => {
             <button
               type="button"
               class="btn btn-accent btn-outline max-w-xs"
-              disabled={isLoading.value}
+              disabled={isLoadingSignal.value}
               onClick$={() => {
                 localStorage.setItem(
                   "docs",
@@ -303,50 +303,46 @@ export default component$(() => {
             <button
               type="button"
               class="btn btn-primary btn-outline max-w-xs"
-              disabled={isLoading.value}
+              disabled={isLoadingSignal.value}
               onClick$={async () => {
-                isLoading.value = true;
-                const parsedFormContextDocs = normalizedDocsSchema.safeParse(
-                  getValues(contextDocsForm, "docs")
-                );
-                const party = getValue(contextDocsForm, "party");
+                isLoadingSignal.value = true;
 
-                if (
-                  !parsedFormContextDocs.success ||
-                  !parsedFormContextDocs.data.length ||
-                  !party
-                ) {
-                  validate(contextDocsForm);
-                  return;
-                }
+                const contextDocsToEmbed =
+                  prepareContextDocsToEmbed(contextDocsForm);
 
-                localStorage.setItem(
-                  "docs",
-                  JSON.stringify(parsedFormContextDocs.data)
-                );
+                if (!contextDocsToEmbed) return;
 
-                const contextDocsToEmbed = Object.values(
-                  parsedFormContextDocs.data
-                ).map((doc, i) => {
-                  return {
-                    ...doc,
-                    pageContent: `${doc.metadata.chapterName}###${doc.pageContent}`, // Adding chapterName to pageContent for better similarity search results
-                    metadata: {
-                      ...doc.metadata,
-                      id: `${party}--${i + 1}`,
-                      party,
-                    },
-                  };
-                });
                 try {
-                  await storeContextDocs(contextDocsToEmbed);
+                  await storeContextDocsToMDb(contextDocsToEmbed);
                 } catch (err) {
                   console.error("something went wrong", err);
                 }
-                isLoading.value = false;
+                isLoadingSignal.value = false;
               }}
             >
-              store to MDB & VS
+              store to MDB
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-outline max-w-xs"
+              disabled={isLoadingSignal.value}
+              onClick$={async () => {
+                isLoadingSignal.value = true;
+
+                const contextDocsToEmbed =
+                  prepareContextDocsToEmbed(contextDocsForm);
+
+                if (!contextDocsToEmbed) return;
+
+                try {
+                  await storeContextDocsToVectorStore(contextDocsToEmbed);
+                } catch (err) {
+                  console.error("something went wrong", err);
+                }
+                isLoadingSignal.value = false;
+              }}
+            >
+              store to VS
             </button>
           </div>
         </div>

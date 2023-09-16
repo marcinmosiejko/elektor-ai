@@ -1,4 +1,9 @@
+import { normalizedDocsSchema } from "~/utils/schemas";
+import { getValue, getValues, validate } from "@modular-forms/qwik";
+
+import type { ContextDocsForm } from ".";
 import type { Document } from "langchain/dist/document";
+import type { FormStore } from "@modular-forms/qwik";
 import type { NormalizedDoc } from "~/utils/types";
 
 export const removeNewLinesWithinSentence = (text: string) => {
@@ -41,4 +46,36 @@ export const denoiseContextDocs = (
     .filter((doc: Document) => doc.pageContent.length > 50);
 
   return normalized;
+};
+
+export const prepareContextDocsToEmbed = (
+  contextDocsForm: FormStore<ContextDocsForm, undefined>
+) => {
+  const parsedFormContextDocs = normalizedDocsSchema.safeParse(
+    getValues(contextDocsForm, "docs")
+  );
+  const party = getValue(contextDocsForm, "party");
+
+  if (
+    !parsedFormContextDocs.success ||
+    !parsedFormContextDocs.data.length ||
+    !party
+  ) {
+    validate(contextDocsForm);
+    return;
+  }
+
+  localStorage.setItem("docs", JSON.stringify(parsedFormContextDocs.data));
+
+  return Object.values(parsedFormContextDocs.data).map((doc, i) => {
+    return {
+      ...doc,
+      pageContent: `${doc.metadata.chapterName}###${doc.pageContent}`, // Adding chapterName to pageContent for better similarity search results
+      metadata: {
+        ...doc.metadata,
+        id: `${party}--${i + 1}`,
+        party,
+      },
+    };
+  });
 };
