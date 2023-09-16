@@ -327,7 +327,7 @@ export default component$(() => {
                 try {
                   await storeContextDocs(contextDocsToEmbed);
                 } catch (err) {
-                  console.log("something went wrong", err);
+                  console.error("something went wrong", err);
                 }
                 isLoading.value = false;
               }}

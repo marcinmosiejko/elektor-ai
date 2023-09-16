@@ -48,7 +48,6 @@ const calcRateLimit = (userFingerprint: string) => {
           : 2 >= remainingSeconds && remainingSeconds <= 4
           ? "minuty"
           : "sekund";
-
       return {
         rateLimitWarning: `Przekroczyłeś limit zapytań, kolejne pytanie będziesz mógł zadać za ${remainingMinutes} ${minuteLabel} i ${
           remainingSeconds === 60 ? 59 : remainingSeconds
@@ -140,7 +139,7 @@ export const getContextDocsAndAnswer = server$(async function ({
   // try to get context docs
 
   const userFingerprint = this.clientConn.ip!;
-  console.log("userFingerprint", userFingerprint);
+
   const rateLimit = calcRateLimit(userFingerprint);
   if (rateLimit) {
     return rateLimit;
@@ -226,14 +225,6 @@ export const generateAnswer = server$(async function* ({
   // Get a lock on the stream
   const reader = stream.getReader();
 
-  reader.closed
-    .then(() => {
-      console.log("The stream has been cancelled");
-    })
-    .catch((err) => {
-      console.log("The stream encountered an error: ", err);
-    });
-
   const decoder = new TextDecoder();
   let done = false;
 
@@ -251,7 +242,7 @@ export const generateAnswer = server$(async function* ({
     console.error("Failed to read stream", err);
     throw err;
   } finally {
-    console.log("---------- Releasing lock ------------");
+    console.log("---------- releasing lock ------------");
     reader.releaseLock();
 
     const userFingerprint = this.clientConn.ip!;
