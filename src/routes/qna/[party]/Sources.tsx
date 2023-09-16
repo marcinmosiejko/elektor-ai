@@ -1,4 +1,6 @@
 import { component$, useContext } from "@builder.io/qwik";
+import DOMPurify from "isomorphic-dompurify";
+import { marked } from "marked";
 import { QnAContext } from "~/context/qna";
 
 export default component$(() => {
@@ -15,6 +17,9 @@ export default component$(() => {
           const chapterName = doc.metadata.chapterName.toUpperCase();
           const pageContent =
             doc.pageContent.split("###")[1] || doc.pageContent;
+
+          const markdown = marked.parse(pageContent);
+          const sanitisedMarkdown = DOMPurify.sanitize(markdown);
           return (
             <div class="flex flex-col gap-1" key={pageContent.slice(0, 20)}>
               <span class="text-xs text-teal-500">
@@ -22,7 +27,11 @@ export default component$(() => {
                 {chapterName && pageNumber && " · "}
                 <span>s. {pageNumber}</span>
               </span>
-              <div class="font-light">{pageContent}</div>
+              <div
+                dangerouslySetInnerHTML={sanitisedMarkdown}
+                class="font-light prose prose-sm leading-5 max-w-none"
+                style={{ width: "100%" }}
+              ></div>
             </div>
           );
         })}
