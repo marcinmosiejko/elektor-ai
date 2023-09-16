@@ -16,8 +16,6 @@ const Header = component$(() => {
           Wyborczy AI
         </Link>
         <div class="flex gap-4 justify-center">
-          <Link href={`/backoffice`}>backoffice</Link>
-
           <button
             class="w-6 -translate-y-[2px]"
             onClick$={() => {
