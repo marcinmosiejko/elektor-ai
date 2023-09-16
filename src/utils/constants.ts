@@ -39,34 +39,34 @@ export const placeholderPartyMap = {
 };
 
 export const partyMap = {
-  // [KOALICJA_OBYWATELSKA]: {
-  //   name: "Koalicja Obywatelska",
-  //   logo: { light: logoKO, dark: logoKOWhite },
-  //   id: KOALICJA_OBYWATELSKA as Party,
-  // },
-  [TRZECIA_DROGA]: {
-    name: "Trzecia Droga",
-    logo: { light: logo_3droga, dark: logo_3droga_white },
-    id: TRZECIA_DROGA as Party,
+  [KOALICJA_OBYWATELSKA]: {
+    name: "Koalicja Obywatelska",
+    logo: { light: logoKO, dark: logoKOWhite },
+    id: KOALICJA_OBYWATELSKA as Party,
   },
   [KONFEDERACJA]: {
     name: "Konfederacja",
     logo: { light: logoKonf, dark: logoKonfWhite },
     id: KONFEDERACJA as Party,
   },
-  [PRAWO_I_SPRAWIEDLIWOSC]: {
-    name: "Prawo i Sprawiedliwość",
-    logo: { light: logoPIS, dark: logoPISWhite },
-    id: PRAWO_I_SPRAWIEDLIWOSC as Party,
-  },
   [LEWICA]: {
     name: "Lewica",
     logo: { light: logoLewica, dark: logoLewicaWhite },
     id: LEWICA as Party,
   },
+  [PRAWO_I_SPRAWIEDLIWOSC]: {
+    name: "Prawo i Sprawiedliwość",
+    logo: { light: logoPIS, dark: logoPISWhite },
+    id: PRAWO_I_SPRAWIEDLIWOSC as Party,
+  },
   [PSL]: {
     name: "Polskie Stronnictwo Ludowe",
     logo: { light: logoPSL, dark: logoPSLWhite },
     id: PSL as Party,
+  },
+  [TRZECIA_DROGA]: {
+    name: "Trzecia Droga",
+    logo: { light: logo_3droga, dark: logo_3droga_white },
+    id: TRZECIA_DROGA as Party,
   },
 };

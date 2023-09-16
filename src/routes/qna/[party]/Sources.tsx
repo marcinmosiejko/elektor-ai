@@ -24,8 +24,8 @@ export default component$(() => {
             <div class="flex flex-col gap-1" key={pageContent.slice(0, 20)}>
               <span class="text-xs text-teal-500">
                 <span>{chapterName}</span>
-                {chapterName && pageNumber && " · "}
-                <span>s. {pageNumber}</span>
+                {chapterName && pageNumber ? " · " : null}
+                {pageNumber ? <span>s. {pageNumber}</span> : null}
               </span>
               <div
                 dangerouslySetInnerHTML={sanitisedMarkdown}

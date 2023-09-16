@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  KOALICJA_OBYWATELSKA,
   KONFEDERACJA,
   LEWICA,
   PLACEHOLDER_PARTY,
@@ -19,7 +20,7 @@ export const questionSchema = z
 
 export const partySchema = z.enum(
   [
-    // KOALICJA_OBYWATELSKA,
+    KOALICJA_OBYWATELSKA,
     KONFEDERACJA,
     PRAWO_I_SPRAWIEDLIWOSC,
     LEWICA,
