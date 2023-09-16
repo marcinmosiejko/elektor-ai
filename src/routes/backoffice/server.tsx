@@ -1,5 +1,5 @@
 import { server$ } from "@builder.io/qwik-city";
-import { contextDocsCollection } from "~/utils/mongoDB";
+import { cacheCollection, contextDocsCollection } from "~/utils/mongoDB";
 import { contextDocsSchema } from "~/utils/schemas";
 import { vectorStore } from "~/utils/pineconeDB";
 
@@ -53,4 +53,8 @@ export const getConextDocsFromMDB = server$(async function (party: Party) {
   if (parsedContextDocs.success) return parsedContextDocs.data;
 
   throw new Error(JSON.stringify(parsedContextDocs.error));
+});
+
+export const clearAllCache = server$(async function () {
+  await cacheCollection.deleteMany({});
 });

@@ -28,6 +28,7 @@ import {
   storeContextDocs,
   getConextDocsFromMDB,
   getContextDocsFromVectorStore,
+  clearAllCache,
 } from "./server";
 
 import type { QwikChangeEvent } from "@builder.io/qwik";
@@ -207,7 +208,20 @@ export default component$(() => {
           multiple
         />
       </Form>
-
+      <div class="flex">
+        <button
+          type="button"
+          class="btn btn-error btn-outline max-w-xs"
+          disabled={isLoading.value}
+          onClick$={async () => {
+            isLoading.value = true;
+            await clearAllCache();
+            isLoading.value = false;
+          }}
+        >
+          clear all cache
+        </button>
+      </div>
       <ContextDocsForm class="flex flex-col gap-10">
         <div class="flex place-content-between">
           <Field name="party">
