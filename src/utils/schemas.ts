@@ -5,6 +5,7 @@ import {
   PLACEHOLDER_PARTY,
   PRAWO_I_SPRAWIEDLIWOSC,
   PSL,
+  TRZECIA_DROGA,
 } from "./constants";
 
 export const questionSchema = z
@@ -23,6 +24,7 @@ export const partySchema = z.enum(
     PRAWO_I_SPRAWIEDLIWOSC,
     LEWICA,
     PSL,
+    TRZECIA_DROGA,
     PLACEHOLDER_PARTY,
   ],
   {

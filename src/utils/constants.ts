@@ -1,4 +1,5 @@
 export const KOALICJA_OBYWATELSKA = "koalicja-obywatelska";
+export const TRZECIA_DROGA = "trzecia-droga";
 export const PRAWO_I_SPRAWIEDLIWOSC = "prawo-i-sprawiedliwosc";
 export const KONFEDERACJA = "konfederacja";
 export const LEWICA = "lewica";
@@ -18,6 +19,8 @@ import logoLewica from "./../images/logo_lewica.png";
 import logoLewicaWhite from "./../images/logo_lewica_white.png";
 import logoPSL from "./../images/logo_psl.png";
 import logoPSLWhite from "./../images/logo_psl_white.png";
+import logo_3droga from "./../images/logo_3droga.png";
+import logo_3droga_white from "./../images/logo_3droga_white.png";
 
 import type { Party } from "./types";
 
@@ -41,6 +44,11 @@ export const partyMap = {
   //   logo: { light: logoKO, dark: logoKOWhite },
   //   id: KOALICJA_OBYWATELSKA as Party,
   // },
+  [TRZECIA_DROGA]: {
+    name: "Trzecia Droga",
+    logo: { light: logo_3droga, dark: logo_3droga_white },
+    id: TRZECIA_DROGA as Party,
+  },
   [KONFEDERACJA]: {
     name: "Konfederacja",
     logo: { light: logoKonf, dark: logoKonfWhite },
