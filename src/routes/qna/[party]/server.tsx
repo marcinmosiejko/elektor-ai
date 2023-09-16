@@ -15,7 +15,7 @@ import { vectorStore } from "~/utils/pineconeDB";
 
 type RequestsMap = Record<string, number[] | undefined>;
 const REQUESTS_MAP: RequestsMap = {};
-const RATE_LIMIT_MAX_COUNT = 1;
+const RATE_LIMIT_MAX_COUNT = 3;
 const RATE_LIMIT_TIME = 1000 * 60 * 60;
 
 const calcRateLimit = (userFingerprint: string) => {
