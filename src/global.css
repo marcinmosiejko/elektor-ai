@@ -12,8 +12,9 @@ html {
 }
 
 body {
-  font-feature-settings: "rlig" 1, "calt" 1;
-  /* @apply font-inter; */
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
 }
 
 .main-grid {

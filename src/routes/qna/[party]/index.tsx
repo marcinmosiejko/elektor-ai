@@ -52,10 +52,10 @@ export default component$(() => {
   return (
     <div class="flex flex-col gap-14">
       <div class="flex flex-col gap-6">
-        <QuestionForm {...{ party, question }} />
+        <QuestionForm class="main-grid" party={party} question={question} />
         <div class="main-grid">
-          <Answer {...{ party, question }} />
-          <PopularQuestions {...{ party, question }} />
+          <Answer party={party} question={question} />
+          <PopularQuestions class="mt-10 lg:mt-0" party={party} />
         </div>
       </div>
       <Sources />

@@ -10,6 +10,7 @@ export type Theme = "light" | "dark";
 export interface QnA {
   party: Party;
   question: string | null;
+  class?: string;
 }
 
 export type Party = z.infer<typeof partySchema>;

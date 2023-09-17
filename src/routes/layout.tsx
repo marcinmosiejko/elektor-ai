@@ -60,7 +60,7 @@ export default component$(() => {
     <ThemeProvider>
       <QnaProvider>
         <Header />
-        <main class=" mx-auto flex w-full max-w-6xl flex-grow flex-col gap-6 px-4 py-12 md:px-8">
+        <main class="mx-auto flex w-full max-w-6xl flex-grow flex-col px-4 py-12 md:px-8">
           <Slot />
         </main>
         <Footer />
