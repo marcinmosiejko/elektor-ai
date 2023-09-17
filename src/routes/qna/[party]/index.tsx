@@ -19,19 +19,21 @@ const popularQuestions = [
 ];
 
 export const usePopularQuestions = routeLoader$(async () => {
-  const mostPopular: string[] | undefined = (
+  const mostPopularFromCache: string[] | undefined = (
     await cacheCollection.find({}).sort({ searchCount: -1 }).limit(5).toArray()
   ).map((item) => item.question);
 
-  while (mostPopular.length < 5) {
+  const mostPopularSet = new Set(mostPopularFromCache);
+
+  while (mostPopularSet.size < 5) {
     const randomQuestionIndex = Math.floor(
       Math.random() * popularQuestions.length
     );
     const randomQuestion = popularQuestions[randomQuestionIndex];
-    if (!mostPopular.includes(randomQuestion)) mostPopular.push(randomQuestion);
+    mostPopularSet.add(randomQuestion);
   }
 
-  return mostPopular.length ? mostPopular : popularQuestions;
+  return mostPopularSet.size ? Array.from(mostPopularSet) : popularQuestions;
 });
 
 export const onRequest: RequestHandler = async ({ redirect, params }) => {
