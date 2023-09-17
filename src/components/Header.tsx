@@ -1,7 +1,7 @@
 import { component$, useContext } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
 import { ThemeContext } from "~/context/theme";
-import { MoonIcon, SunIcon, LogOutIcon } from "lucide-qwik";
+import { MoonIcon, SunIcon, LogOutIcon, HelpCircleIcon } from "lucide-qwik";
 import { useAuthSession, useAuthSignout } from "~/routes/plugin@auth";
 
 const Header = component$(() => {
@@ -28,12 +28,13 @@ const Header = component$(() => {
               themeSignal.value === "dark" ? (
                 <SunIcon class="h-6 w-6" />
               ) : (
-                <MoonIcon class="h-6 w-6 -translate-y-[2px]" />
+                <MoonIcon class="h-6 w-6" />
               )
             ) : null}
           </button>
-
-          {/* <HelpCircleIcon class="h-6 w-6" /> */}
+          <Link href={`/about`}>
+            <HelpCircleIcon class="h-6 w-6" />
+          </Link>
 
           {session.value?.user?.email && (
             <button class="-translate-y-[2px]" type="button">
