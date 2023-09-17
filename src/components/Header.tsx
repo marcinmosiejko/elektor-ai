@@ -1,7 +1,13 @@
 import { component$, useContext } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
 import { ThemeContext } from "~/context/theme";
-import { MoonIcon, SunIcon, LogOutIcon, HelpCircleIcon } from "lucide-qwik";
+import {
+  MoonIcon,
+  SunIcon,
+  LogOutIcon,
+  HelpCircleIcon,
+  MailIcon,
+} from "lucide-qwik";
 import { useAuthSession, useAuthSignout } from "~/routes/plugin@auth";
 
 const Header = component$(() => {
@@ -15,6 +21,7 @@ const Header = component$(() => {
         <Link href={`/`} class="text-lg font-semibold focus-visible:rounded-md">
           Wyborczy AI
         </Link>
+
         <div class="flex gap-4 justify-center">
           <button
             class="w-6 -translate-y-[2px]"
@@ -32,8 +39,12 @@ const Header = component$(() => {
               )
             ) : null}
           </button>
-          <Link href={`/about`}>
+
+          <Link href={`/o-apce`}>
             <HelpCircleIcon class="h-6 w-6" />
+          </Link>
+          <Link href={`/kontakt`}>
+            <MailIcon class="h-6 w-6" />
           </Link>
 
           {session.value?.user?.email && (

@@ -3,7 +3,7 @@ import Content from "./content.mdx";
 
 const About = component$(() => {
   return (
-    <div class="w-full flex justify-center">
+    <div class="w-full flex justify-center px-2">
       <div class="prose max-w-3xl text-sm prose-headings:text-primary">
         <Content />
       </div>
