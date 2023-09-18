@@ -2,14 +2,14 @@ lockfileVersion: 5.4
 
 specifiers:
   '@auth/core': 0.14.0
-  '@builder.io/qwik': 1.2.7
+  '@builder.io/qwik': 1.2.11
   '@builder.io/qwik-auth': 0.1.1
-  '@builder.io/qwik-city': 1.2.7
+  '@builder.io/qwik-city': 1.2.11
   '@modular-forms/qwik': 0.20.2
   '@pinecone-database/pinecone': 1.0.0
   '@tailwindcss/typography': ^0.5.10
   '@types/busboy': ^1.5.0
-  '@types/compression': ^1.7.2
+  '@types/compression': ^1.7.3
   '@types/eslint': 8.44.2
   '@types/express': 4.17.17
   '@types/lodash': ^4.14.198
@@ -47,10 +47,10 @@ specifiers:
   zod: ^3.22.2
 
 dependencies:
-  '@modular-forms/qwik': 0.20.2_d7ab6l7hpaek63pdxiksp4ytwe
+  '@modular-forms/qwik': 0.20.2_qrgkbslaegthtjznlndla4uodq
   '@pinecone-database/pinecone': 1.0.0
   '@types/lodash': 4.14.198
-  '@unpic/qwik': 0.0.25_@builder.io+qwik@1.2.7
+  '@unpic/qwik': 0.0.25_@builder.io+qwik@1.2.11
   busboy: 1.6.0
   clsx: 2.0.0
   isomorphic-dompurify: 1.8.0
@@ -67,9 +67,9 @@ dependencies:
 
 devDependencies:
   '@auth/core': 0.14.0
-  '@builder.io/qwik': 1.2.7_undici@5.24.0
+  '@builder.io/qwik': 1.2.11_undici@5.24.0
   '@builder.io/qwik-auth': 0.1.1_@auth+core@0.14.0
-  '@builder.io/qwik-city': 1.2.7
+  '@builder.io/qwik-city': 1.2.11
   '@tailwindcss/typography': 0.5.10_tailwindcss@3.3.3
   '@types/busboy': 1.5.0
   '@types/compression': 1.7.3
@@ -146,8 +146,8 @@ packages:
       '@auth/core': 0.14.0
     dev: true
 
-  /@builder.io/qwik-city/1.2.7:
-    resolution: {integrity: sha512-L5zykrLcvQ8wo2UO9SBIw3R7f07Mp3S5YHoEWir/9s4kJfrunyyyjEXwqhWbUo7GqPZL+o3R6fi5iXuc2Fg4rQ==}
+  /@builder.io/qwik-city/1.2.11:
+    resolution: {integrity: sha512-meeApo5czwGsn7bywtu2P4bBdRTprwtfjcwE06APvhRF2Y5xK0bv7vW9vGbRvPy/w6o5Izc+CauLepryOcXiGg==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     dependencies:
       '@mdx-js/mdx': 2.3.0
@@ -161,8 +161,8 @@ packages:
       - rollup
       - supports-color
 
-  /@builder.io/qwik/1.2.7_undici@5.24.0:
-    resolution: {integrity: sha512-jTaJ/LaifUD7UvvSg1JGSySiUl/RxQaul/QrXVr+jbky+hpa6jk0HHQ9Hv21MptAqwU+EPKL81Wqfws4CsHkaQ==}
+  /@builder.io/qwik/1.2.11_undici@5.24.0:
+    resolution: {integrity: sha512-C0umHmXhKdMu2dP/UTBEvuoSC1pfYSPC43jzYiF6dMXpQasgyDXIQML8yzrAsxnimr7OfKfn2vNyn2t5e9BG8A==}
     engines: {node: '>=16.8.0 <18.0.0 || >=18.11'}
     hasBin: true
     peerDependencies:
@@ -479,14 +479,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@modular-forms/qwik/0.20.2_d7ab6l7hpaek63pdxiksp4ytwe:
+  /@modular-forms/qwik/0.20.2_qrgkbslaegthtjznlndla4uodq:
     resolution: {integrity: sha512-8wmud+Ds0f4x+kqjFZfT5OeQKHUzNA76G5IMuLGPmpXMclP1AWsG2fHWpc6B07agyoTA5605XpmYEUbjaHWLQg==}
     peerDependencies:
       '@builder.io/qwik': ^1.2.4
       '@builder.io/qwik-city': ^1.2.4
     dependencies:
-      '@builder.io/qwik': 1.2.7_undici@5.24.0
-      '@builder.io/qwik-city': 1.2.7
+      '@builder.io/qwik': 1.2.11_undici@5.24.0
+      '@builder.io/qwik-city': 1.2.11
     dev: false
 
   /@mongodb-js/saslprep/1.1.0:
@@ -894,13 +894,13 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@unpic/qwik/0.0.25_@builder.io+qwik@1.2.7:
+  /@unpic/qwik/0.0.25_@builder.io+qwik@1.2.11:
     resolution: {integrity: sha512-8YvmmOwk7dWdtAlZFiNM+z7SWHJ/M6uoleVr8y82eeu2yxPvr5n8kUgG1MdXX+re0RBtumF1vfEe4GP2UJoFMg==}
     engines: {node: '>=15.0.0'}
     peerDependencies:
       '@builder.io/qwik': '*'
     dependencies:
-      '@builder.io/qwik': 1.2.7_undici@5.24.0
+      '@builder.io/qwik': 1.2.11_undici@5.24.0
     dev: false
 
   /abab/2.0.6:
