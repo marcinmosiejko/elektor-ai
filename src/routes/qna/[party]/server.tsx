@@ -15,20 +15,23 @@ import { vectorStore } from "~/utils/pineconeDB";
 
 type RequestsMap = Record<string, number[] | undefined>;
 const REQUESTS_MAP: RequestsMap = {};
-const RATE_LIMIT_MAX_COUNT = 3;
-const RATE_LIMIT_TIME = 1000 * 60 * 60;
+const RATE_LIMIT_MAX_COUNT = 10;
+const RATE_LIMIT_TIME = 1000 * 60 * 60 * 24; // 24h
 
 const calcRateLimit = (userFingerprint: string) => {
-  const userReqests: number[] = [];
+  const userReqestsWithinRateLimitTime: number[] = [];
+  const userRequests = REQUESTS_MAP[userFingerprint] || [];
 
-  for (const requestTs of REQUESTS_MAP[userFingerprint] || []) {
+  for (const requestTs of userRequests) {
     if (Date.now() - requestTs < RATE_LIMIT_TIME) {
-      userReqests.push(requestTs);
+      userReqestsWithinRateLimitTime.push(requestTs);
     }
   }
 
-  if (userReqests.length === RATE_LIMIT_MAX_COUNT) {
-    const timeFromFirstRequest = Date.now() - userReqests[0];
+  REQUESTS_MAP[userFingerprint] = userReqestsWithinRateLimitTime;
+
+  if (userReqestsWithinRateLimitTime.length === RATE_LIMIT_MAX_COUNT) {
+    const timeFromFirstRequest = Date.now() - userReqestsWithinRateLimitTime[0];
 
     if (timeFromFirstRequest < RATE_LIMIT_TIME) {
       const remainingTime = RATE_LIMIT_TIME - timeFromFirstRequest;
@@ -48,6 +51,7 @@ const calcRateLimit = (userFingerprint: string) => {
           : 2 >= remainingSeconds && remainingSeconds <= 4
           ? "minuty"
           : "sekund";
+
       return {
         rateLimitWarning: `Przekroczyłeś limit zapytań, kolejne pytanie będziesz mógł zadać za ${remainingMinutes} ${minuteLabel} i ${
           remainingSeconds === 60 ? 59 : remainingSeconds
