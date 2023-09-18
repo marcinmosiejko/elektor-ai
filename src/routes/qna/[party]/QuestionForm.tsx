@@ -83,6 +83,7 @@ export default component$((props: QnA) => {
               <button
                 class="btn absolute top-2 right-2 p-4 cursor-pointer"
                 type="submit"
+                disabled={qnaContext.isGeneratingAnswer}
               >
                 <SendIcon class="h-4 w-4 rotate-[15deg]" />
               </button>
