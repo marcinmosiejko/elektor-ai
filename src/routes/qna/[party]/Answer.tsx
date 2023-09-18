@@ -16,7 +16,7 @@ import type { QnA } from "~/utils/types";
 import { generateAnswer, getContextDocsAndAnswer } from "./server";
 import { QnAContext } from "~/context/qna";
 
-const somethingWentWrongMessage = "Coś poszło nie tak :(";
+const somethingWentWrongMessage = "Coś poszło nie tak 🙈";
 
 const welcomeMessage = `Cześć!
 Jestem sztuczną inteligencją, która zna treść programów wyborczych. Chętnie pomogę Ci dokonać bardziej świadomej decyzji na kogo oddać głos. Wybierz której partii program chciałbyś lepiej poznać i pytaj śmiało :)`;
