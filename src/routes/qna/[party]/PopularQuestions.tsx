@@ -7,13 +7,12 @@ import { cn } from "~/utils/helpers";
 const maxCount = 5;
 
 interface PopularQuestionsProps {
-  party: string;
   class?: string;
 }
 export default component$((props: PopularQuestionsProps) => {
-  const { party, class: className } = props;
+  const { class: className } = props;
   const popularQuestionsSingal = usePopularQuestions();
-  const qnaState = useContext(QnAContext);
+  const qnaContext = useContext(QnAContext);
 
   return (
     <div class={cn(className)}>
@@ -21,12 +20,12 @@ export default component$((props: PopularQuestionsProps) => {
       <div class="flex flex-wrap gap-4 text-sm">
         {popularQuestionsSingal.value.slice(0, maxCount).map((question) => {
           const query = new URLSearchParams({ question });
-          const url = `/qna/${party}?${query.toString()}`;
+          const url = `/qna/${qnaContext.currentParty}?${query.toString()}`;
           return (
             <FullyRoundedButton
               key={question}
-              href={qnaState.isGeneratingAnswer ? undefined : url}
-              disabled={qnaState.isGeneratingAnswer}
+              href={qnaContext.isGeneratingAnswer ? undefined : url}
+              disabled={qnaContext.isGeneratingAnswer}
             >
               {question}
             </FullyRoundedButton>

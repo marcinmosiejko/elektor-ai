@@ -55,7 +55,7 @@ export default component$(() => {
         <QuestionForm class="main-grid" party={party} question={question} />
         <div class="main-grid">
           <Answer party={party} question={question} />
-          <PopularQuestions class="mt-10 lg:mt-0" party={party} />
+          <PopularQuestions class="mt-10 lg:mt-0" />
         </div>
       </div>
       <Sources />

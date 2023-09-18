@@ -37,7 +37,7 @@ export default component$((props: QnA) => {
   const nav = useNavigate();
   const themeSignal = useContext(ThemeContext);
 
-  const { isGeneratingAnswer } = useContext(QnAContext);
+  const qnaContext = useContext(QnAContext);
 
   const [questionForm, { Form, Field }] = useForm<QuestionForm>({
     loader: { value: { question: "", party: DEFAULT_FO_PARTY } },
@@ -53,6 +53,7 @@ export default component$((props: QnA) => {
   useTask$(({ track }) => {
     setValue(questionForm, "question", questionParam || "");
     setValue(questionForm, "party", partyParam);
+    qnaContext.currentParty = partyParam;
 
     track(() => questionParam);
     track(() => partyParam);
@@ -77,7 +78,7 @@ export default component$((props: QnA) => {
                 error={field.error}
                 placeholder="np. Jakie będą korzyści dla młodych?"
                 inputClass="h-16 pr-20"
-                disabled={isGeneratingAnswer}
+                disabled={qnaContext.isGeneratingAnswer}
               />
               <button
                 class="btn absolute top-2 right-2 p-4 cursor-pointer"
@@ -107,7 +108,10 @@ export default component$((props: QnA) => {
                     })
                   )}
                   error={field.error}
-                  disabled={isGeneratingAnswer}
+                  disabled={qnaContext.isGeneratingAnswer}
+                  onChange$={() => {
+                    qnaContext.currentParty = field.value!;
+                  }}
                 />
                 <Image
                   class="absolute top-0 left-2 p-3 cursor-pointer pointer-events-none"
