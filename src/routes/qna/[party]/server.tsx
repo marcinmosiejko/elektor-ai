@@ -1,14 +1,13 @@
 import { server$ } from "@builder.io/qwik-city";
 import { DEFAULT_MAX_SOURCE_COUNT, partyMap } from "~/utils/constants";
-import { OpenAIStream } from "~/utils/openAIStream";
 import {
   cachedContextDocsAndAnswerSchema,
   contextDocsSchema,
 } from "~/utils/schemas";
 import { cacheCollection, contextDocsCollection } from "~/utils/mongoDB";
 import lodash from "lodash";
+import OpenAI from "openai";
 
-import type { OpenAIStreamPayload } from "~/utils/openAIStream";
 import type { ContextDoc, Party } from "~/utils/types";
 import type { MongoError } from "mongodb";
 import { vectorStore } from "~/utils/pineconeDB";
@@ -183,6 +182,10 @@ export const generateAnswer = server$(async function* ({
   contextDocs: ContextDoc[];
   party: Party;
 }) {
+  const openai = new OpenAI({
+    apiKey: this.env.get("OPENAI_API_KEY"),
+  });
+
   const context = contextDocs
     .map(
       (doc) =>
@@ -204,55 +207,41 @@ export const generateAnswer = server$(async function* ({
  
   `;
 
-  const payload: OpenAIStreamPayload = {
-    model: "gpt-3.5-turbo",
-    messages: [
-      { role: "system", content: instructionWithContext },
-      { role: "user", content: question },
-    ],
-    temperature: 0.1,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 1000,
-    stream: true,
-    n: 1,
-  };
-
   let stream;
   try {
-    stream = await OpenAIStream("chat", payload, {
-      // @ts-ignore
-      controller: { signal: this.request.signal },
-    });
+    stream = (await openai.chat.completions.create(
+      {
+        model: "gpt-3.5-turbo-16k",
+        messages: [
+          { role: "system", content: instructionWithContext },
+          { role: "user", content: question },
+        ],
+        temperature: 0.3,
+        max_tokens: 1000,
+        stream: true,
+        n: 1,
+      },
+      {
+        signal: this.request.signal,
+      }
+    )) as any;
   } catch (err) {
     console.error("Failed to get stream", err);
     throw err;
   }
-  console.log("is locked", stream.locked);
-  // Get a lock on the stream
-  const reader = stream.getReader();
-
-  const decoder = new TextDecoder();
-  let done = false;
 
   let answer = "";
 
   try {
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      answer += chunkValue;
-      yield chunkValue;
+    for await (const part of stream) {
+      const token = part.choices[0]?.delta?.content || "";
+      answer += token;
+      yield token;
     }
   } catch (err) {
     console.error("Failed to read stream", err);
     throw err;
   } finally {
-    console.log("---------- releasing lock ------------");
-    reader.releaseLock();
-
     const userFingerprint = this.clientConn.ip!;
     REQUESTS_MAP[userFingerprint] = [
       ...(REQUESTS_MAP[userFingerprint] || []),

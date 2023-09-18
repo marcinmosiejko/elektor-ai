@@ -64,7 +64,7 @@
     "lucide-qwik": "^1.0.0",
     "marked": "^9.0.1",
     "mongodb": "6.0.0",
-    "openai-streams": "^6.2.0",
+    "openai": "^4.8.0",
     "pdf-parse": "^1.1.1",
     "tailwind-merge": "^1.14.0",
     "update": "^0.7.4",
