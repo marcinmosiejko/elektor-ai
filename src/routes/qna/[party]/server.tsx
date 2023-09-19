@@ -18,6 +18,26 @@ const REQUESTS_MAP: RequestsMap = {};
 const RATE_LIMIT_MAX_COUNT = 10;
 const RATE_LIMIT_TIME = 1000 * 60 * 60 * 24; // 24h
 
+const getLastDigit = (value: number) => {
+  const valueStr = value.toString();
+  const lastDigit = valueStr.at(-1) || "0";
+  return parseInt(lastDigit);
+};
+
+const getTimeLabel = (remainingTime: number, wordBase: string) => {
+  if (!remainingTime) return "";
+
+  const lastDigit = getLastDigit(remainingTime);
+
+  return `${remainingTime} ${
+    lastDigit === 1
+      ? `${wordBase}ę`
+      : lastDigit >= 2 && lastDigit <= 4
+      ? `${wordBase}y`
+      : wordBase
+  }`;
+};
+
 const getUserIP = (request: Request, clientConn: ClientConn) => {
   return request.headers.get("x-forwarded-for") || clientConn.ip!;
 };
@@ -39,27 +59,24 @@ const calcRateLimit = (userFingerprint: string) => {
 
     if (timeFromFirstRequest < RATE_LIMIT_TIME) {
       const remainingTime = RATE_LIMIT_TIME - timeFromFirstRequest;
-      const remainingMinutes = Math.floor(remainingTime / (60 * 1000));
-      const remainingSeconds = Math.ceil((remainingTime % (60 * 1000)) / 1000);
+      const remainingHours = Math.floor(remainingTime / (60 * 60 * 1000));
+      const remainingMinutes = Math.floor(
+        (remainingTime % (60 * 60 * 1000)) / (60 * 1000)
+      );
+      const remainingSeconds = Math.ceil(
+        ((remainingTime % (60 * 60 * 1000)) % (60 * 1000)) / 1000
+      );
 
-      const minuteLabel =
-        remainingMinutes === 1
-          ? "minutę"
-          : 2 >= remainingMinutes && remainingMinutes <= 4
-          ? "minuty"
-          : "minut";
-
-      const secondLabel =
-        remainingSeconds === 1
-          ? "sekundę"
-          : 2 >= remainingSeconds && remainingSeconds <= 4
-          ? "minuty"
-          : "sekund";
+      const remainingHoursLabel = getTimeLabel(remainingHours, "godzin");
+      const remainingMunitesLabel = getTimeLabel(remainingMinutes, "minut");
+      const remainingSecondsLabel = getTimeLabel(remainingSeconds, "sekund");
 
       return {
-        rateLimitWarning: `Przekroczyłeś limit zapytań, kolejne pytanie będziesz mógł zadać za ${remainingMinutes} ${minuteLabel} i ${
-          remainingSeconds === 60 ? 59 : remainingSeconds
-        } ${secondLabel}.`,
+        rateLimitWarning: `Przekroczyłeś limit zapytań, kolejne pytanie będziesz mógł zadać za${
+          remainingHoursLabel ? ` ${remainingHoursLabel}` : ""
+        }${remainingMunitesLabel ? ` ${remainingMunitesLabel}` : ""}${
+          remainingSecondsLabel ? ` ${remainingSecondsLabel}` : ""
+        }.`,
       };
     }
   }
