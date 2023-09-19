@@ -20,8 +20,21 @@ const popularQuestions = [
 
 export const usePopularQuestions = routeLoader$(async () => {
   const mostPopularFromCache: string[] | undefined = (
-    await cacheCollection.find({}).sort({ searchCount: -1 }).limit(5).toArray()
-  ).map((item) => item.question);
+    await cacheCollection
+      .aggregate([
+        {
+          $group: {
+            _id: "$question",
+            totalSearchCount: { $sum: "$searchCount" },
+          },
+        },
+        {
+          $sort: { totalSearchCount: -1 },
+        },
+      ])
+      .limit(10)
+      .toArray()
+  ).map((item) => item._id);
 
   const mostPopularSet = new Set(mostPopularFromCache);
 
