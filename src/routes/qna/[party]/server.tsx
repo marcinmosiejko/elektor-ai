@@ -7,15 +7,20 @@ import {
 import { cacheCollection, contextDocsCollection } from "~/utils/mongoDB";
 import lodash from "lodash";
 import OpenAI from "openai";
+import { vectorStore } from "~/utils/pineconeDB";
 
 import type { ContextDoc, Party } from "~/utils/types";
 import type { MongoError } from "mongodb";
-import { vectorStore } from "~/utils/pineconeDB";
+import type { ClientConn } from "@builder.io/qwik-city/middleware/request-handler";
 
 type RequestsMap = Record<string, number[] | undefined>;
 const REQUESTS_MAP: RequestsMap = {};
 const RATE_LIMIT_MAX_COUNT = 10;
 const RATE_LIMIT_TIME = 1000 * 60 * 60 * 24; // 24h
+
+const getUserIP = (request: Request, clientConn: ClientConn) => {
+  return request.headers.get("x-forwarded-for") || clientConn.ip!;
+};
 
 const calcRateLimit = (userFingerprint: string) => {
   const userReqestsWithinRateLimitTime: number[] = [];
@@ -141,7 +146,7 @@ export const getContextDocsAndAnswer = server$(async function ({
   // and if a user used up their quota, we don't want to even
   // try to get context docs
 
-  const userFingerprint = this.clientConn.ip!;
+  const userFingerprint = getUserIP(this.request, this.clientConn);
 
   const rateLimit = calcRateLimit(userFingerprint);
   if (rateLimit) {
@@ -242,7 +247,7 @@ export const generateAnswer = server$(async function* ({
     console.error("Failed to read stream", err);
     throw err;
   } finally {
-    const userFingerprint = this.clientConn.ip!;
+    const userFingerprint = getUserIP(this.request, this.clientConn);
     REQUESTS_MAP[userFingerprint] = [
       ...(REQUESTS_MAP[userFingerprint] || []),
       Date.now(),
