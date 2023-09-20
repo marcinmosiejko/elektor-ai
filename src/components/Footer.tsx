@@ -5,7 +5,7 @@ const Footer = component$(() => {
     <footer class="p-5">
       <div class="m-auto flex max-w-2xl justify-center">
         <span class="text-sm font-light text-neutral">
-          Stópka &copy; {new Date().getFullYear()}
+          Wyborczy AI &copy; {new Date().getFullYear()}
         </span>
       </div>
     </footer>
