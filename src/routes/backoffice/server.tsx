@@ -1,7 +1,7 @@
 import { server$ } from "@builder.io/qwik-city";
-import { cacheCollection, contextDocsCollection } from "~/utils/mongoDB";
+import { getCacheCollection, getContextDocsCollection } from "~/utils/mongoDB";
 import { contextDocsSchema } from "~/utils/schemas";
-import { vectorStore } from "~/utils/pineconeDB";
+import { getVectorStore } from "~/utils/pineconeDB";
 
 import type { ContextDoc, Party } from "~/utils/types";
 
@@ -12,7 +12,7 @@ export const storeContextDocsToMDb = server$(async function (
   contextDocs: ContextDoc[]
 ) {
   const party = contextDocs.at(0)?.metadata.party;
-
+  const contextDocsCollection = await getContextDocsCollection();
   await contextDocsCollection.deleteMany({ "metadata.party": party });
   await contextDocsCollection.insertMany(contextDocs);
 });
@@ -24,6 +24,8 @@ export const storeContextDocsToVectorStore = server$(async function (
   contextDocs: ContextDoc[]
 ) {
   const party = contextDocs.at(0)?.metadata.party;
+
+  const vectorStore = await getVectorStore();
 
   const toDelete = await vectorStore.similaritySearch("", 1000, { party });
   const idsToDelete = toDelete.map((doc) => doc.metadata.id);
@@ -39,6 +41,7 @@ export const storeContextDocsToVectorStore = server$(async function (
 export const getContextDocsFromVectorStore = server$(async function (
   party: Party
 ) {
+  const vectorStore = await getVectorStore();
   const contextDocs = await vectorStore.similaritySearch("", 1000, {
     party,
   });
@@ -58,6 +61,7 @@ export const getContextDocsFromVectorStore = server$(async function (
 });
 
 export const getConextDocsFromMDb = server$(async function (party: Party) {
+  const contextDocsCollection = await getContextDocsCollection();
   const contextDocs = await contextDocsCollection
     .find({ "metadata.party": party })
     .sort({ "metadata.pageNumber": 1 })
@@ -71,5 +75,6 @@ export const getConextDocsFromMDb = server$(async function (party: Party) {
 });
 
 export const clearAllCache = server$(async function () {
+  const cacheCollection = await getCacheCollection();
   await cacheCollection.deleteMany({});
 });

@@ -7,7 +7,7 @@ import type { Party } from "~/utils/types";
 import type { RequestHandler } from "@builder.io/qwik-city";
 import Sources from "./Sources";
 import QuestionForm from "./QuestionForm";
-import { cacheCollection } from "~/utils/mongoDB";
+import { getCacheCollection } from "~/utils/mongoDB";
 import { getRandomPartyId } from "~/utils/helpers";
 
 const popularQuestions = [
@@ -19,6 +19,7 @@ const popularQuestions = [
 ];
 
 export const usePopularQuestions = routeLoader$(async () => {
+  const cacheCollection = await getCacheCollection();
   const mostPopularFromCache: string[] | undefined = (
     await cacheCollection
       .aggregate([

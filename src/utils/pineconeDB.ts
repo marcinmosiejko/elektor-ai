@@ -5,7 +5,7 @@ import { PineconeStore } from "langchain/vectorstores/pinecone";
 const client = new PineconeClient();
 let pineconeIndex: any | undefined;
 // not undefined after ensureVectorStore succesfully runs on first request
-let vectorStore: PineconeStore;
+let vectorStore: PineconeStore | undefined;
 
 const ensureVectorStore = async ({
   apiKey,
@@ -40,4 +40,17 @@ const ensureVectorStore = async ({
   return vectorStore;
 };
 
-export { ensureVectorStore, vectorStore };
+const getVectorStore = async () => {
+  if (!vectorStore) {
+    await ensureVectorStore({
+      apiKey: process.env.PINECONE_API_KEY!,
+      environment: process.env.PINECONE_ENVIRONMENT!,
+      indexName: process.env.PINECONE_INDEX_NAME!,
+      openAIApiKey: process.env.OPENAI_API_KEY!,
+    });
+  }
+
+  return vectorStore!;
+};
+
+export { getVectorStore };

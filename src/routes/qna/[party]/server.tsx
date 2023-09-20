@@ -4,14 +4,13 @@ import {
   cachedContextDocsAndAnswerSchema,
   contextDocsSchema,
 } from "~/utils/schemas";
-import { cacheCollection, contextDocsCollection } from "~/utils/mongoDB";
 import lodash from "lodash";
 import OpenAI from "openai";
-import { vectorStore } from "~/utils/pineconeDB";
+import { getVectorStore } from "~/utils/pineconeDB";
 
 import type { ContextDoc, Party } from "~/utils/types";
-import type { MongoError } from "mongodb";
 import type { ClientConn } from "@builder.io/qwik-city/middleware/request-handler";
+import { getCacheCollection, getContextDocsCollection } from "~/utils/mongoDB";
 
 type RequestsMap = Record<string, number[] | undefined>;
 const REQUESTS_MAP: RequestsMap = {};
@@ -100,6 +99,8 @@ export const getContextDocsAndAnswer = server$(async function ({
   contextDocs?: ContextDoc[];
   rateLimitWarning?: string;
 }> {
+  const cacheCollection = await getCacheCollection();
+
   // 1. get cached answer and context docs ids
   let cachedData;
   try {
@@ -114,6 +115,7 @@ export const getContextDocsAndAnswer = server$(async function ({
   const { contextDocsIds, answer, searchCount } = cachedData;
 
   if (answer && contextDocsIds && searchCount) {
+    const contextDocsCollection = await getContextDocsCollection();
     // 2. get context docs based on cached context docs ids
     let contextDocs;
     if (contextDocsIds?.length) {
@@ -172,6 +174,7 @@ export const getContextDocsAndAnswer = server$(async function ({
 
   let contextDocs;
   try {
+    const vectorStore = await getVectorStore();
     contextDocs = (await vectorStore.similaritySearch(
       question,
       DEFAULT_MAX_SOURCE_COUNT,
@@ -272,6 +275,7 @@ export const generateAnswer = server$(async function* ({
   }
 
   try {
+    const cacheCollection = await getCacheCollection();
     await cacheCollection.insertOne({
       question,
       contextDocsIds: contextDocs.map((doc) => doc.metadata.id),
@@ -280,6 +284,6 @@ export const generateAnswer = server$(async function* ({
       party,
     });
   } catch (err) {
-    console.error("Failed to cache answer", (err as MongoError).message);
+    console.error("Failed to cache answer", err);
   }
 });

@@ -10,8 +10,8 @@ import type { Db, Collection } from "mongodb";
 let mDBClient: MongoClient | undefined;
 let mDB: Db | undefined;
 // not undefined after ensureMongoDB succesfully runs on first request
-let cacheCollection: Collection;
-let contextDocsCollection: Collection;
+let cacheCollection: Collection | undefined;
+let contextDocsCollection: Collection | undefined;
 
 const ensureMongoDB = async ({ url }: { url: string }) => {
   if (!mDBClient) {
@@ -26,4 +26,18 @@ const ensureMongoDB = async ({ url }: { url: string }) => {
   }
 };
 
-export { cacheCollection, contextDocsCollection, ensureMongoDB };
+const getCacheCollection = async () => {
+  if (!cacheCollection) {
+    await ensureMongoDB({ url: process.env.MONGO_URL! });
+  }
+  return cacheCollection!;
+};
+
+const getContextDocsCollection = async () => {
+  if (!contextDocsCollection) {
+    await ensureMongoDB({ url: process.env.MONGO_URL! });
+  }
+  return contextDocsCollection!;
+};
+
+export { getCacheCollection, getContextDocsCollection };
