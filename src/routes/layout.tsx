@@ -70,11 +70,13 @@ export default component$(() => {
 });
 
 export const head: DocumentHead = {
-  title: "Wyborczy AI",
+  title:
+    "Wyborczy AI - Głosuj bardziej świadomie z pomocą sztucznej inteligencji",
   meta: [
     {
       name: "description",
-      content: "description",
+      content:
+        "Poznaj programy wyborcze z pomocą AI i podejmij bardziej świadomą decyzję na kogo oddać swój głos podczas tegorocznych wyborów parlamentarnych zaplanowanych na 15 października 2023.",
     },
   ],
 };
