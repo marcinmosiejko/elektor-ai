@@ -4,7 +4,7 @@ import type { Provider } from "@auth/core/providers";
 
 export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
   serverAuth$(({ env }) => ({
-    secret: env.get("AUTH_SECRET"),
+    secret: env.get("AUTH_SECRET") || "secret-placeholder-for-build",
     trustHost: true,
     providers: [
       GitHub({
