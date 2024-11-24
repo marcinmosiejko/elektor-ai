@@ -12,9 +12,14 @@
   <p align="center">
     AI Voting Assistant
     <br />
-    <br />
-    <a href="https://elektorai.pl/">View</a>
   </p>
+
+
+
+https://github.com/user-attachments/assets/1117e68a-3a70-42c7-a8d5-ff14dcdd8739
+
+
+ 
 </div>
 
 <br />
